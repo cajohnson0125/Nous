@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cajohnson0125/Nous/internal"
+	"github.com/cajohnson0125/Nous/internal/config"
 
 	"github.com/spf13/cobra"
 )
@@ -29,7 +30,25 @@ func configInitCmd() *cobra.Command {
 		Long:  "Create a default configuration file at the user-level XDG config path.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("config init not yet implemented (Phase 2)")
+			exists, path, err := config.UserConfigExists()
+			if err != nil {
+				return fmt.Errorf("check config path: %w", err)
+			}
+
+			if exists {
+				fmt.Printf("Config file already exists: %s\n", path)
+				fmt.Println("Edit the existing file or remove it before reinitializing.")
+				return nil
+			}
+
+			cfg := config.Default()
+			written, err := config.Save(cfg)
+			if err != nil {
+				return fmt.Errorf("write config: %w", err)
+			}
+
+			fmt.Printf("Config file created: %s\n", written)
+			return nil
 		},
 	}
 
