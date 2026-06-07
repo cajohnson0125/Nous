@@ -18,7 +18,7 @@ This document covers **Lip Gloss** (charmbracelet/lipgloss) for declarative term
 **License:** MIT
 **Stars:** 11.4k | **Importers:** 9,630
 
-> **Note:** Lip Gloss v2 uses import path `github.com/charmbracelet/lipgloss/v2`. The pkg.go.dev page for v1 shows `v1.1.0`; use the v2 path.
+> **Note:** Lip Gloss v2 uses import path `charm.land/lipgloss/v2`. The pkg.go.dev page for v1 shows `v1.1.0`; use the v2 path.
 
 ### 1.1 Role in Nous
 
@@ -184,7 +184,7 @@ import (
     "fmt"
     "strings"
 
-    "github.com/charmbracelet/lipgloss/v2"
+    "charm.land/lipgloss/v2"
 )
 
 func main() {
@@ -226,7 +226,7 @@ func main() {
 **License:** MIT
 **Stars:** 8.5k | **Forks:** 420
 
-> **Note:** Bubbles v2 uses import path `github.com/charmbracelet/bubbles/v2`.
+> **Note:** Bubbles v2 uses import path `charm.land/bubbles/v2`.
 
 ### 2.1 Role in Nous
 
@@ -359,19 +359,19 @@ var keys = keyMap{
 
 **Pattern 1: Split pane with viewport + list**
 ```go
-func (m model) View() string {
+func (m model) View() tea.View {
     leftPane := m.list.View()
     rightPane := m.viewport.View()
-    return lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane)
+    return *tea.NewView(lipgloss.JoinHorizontal(lipgloss.Top, leftPane, rightPane))
 }
 ```
 
 **Pattern 2: Status bar + main content**
 ```go
-func (m model) View() string {
+func (m model) View() tea.View {
     statusBar := m.statusStyle.Render(fmt.Sprintf("Nodes: %d | Version: %s", m.nodes, m.version))
     main := m.viewport.View()
-    return lipgloss.JoinVertical(lipgloss.Left, main, statusBar)
+    return *tea.NewView(lipgloss.JoinVertical(lipgloss.Left, main, statusBar))
 }
 ```
 
@@ -380,7 +380,7 @@ func (m model) View() string {
 - **Stable v2 release.** v2.1.0 released March 2026.
 - **8.5k stars**, used in production by Glow and many applications.
 - **Active development.** v2.1.0 added dynamic height for textareas.
-- **Bubbletea v2 compatible.** Import path `github.com/charmbracelet/bubbles/v2`.
+- **Bubbletea v2 compatible.** Import path `charm.land/bubbles/v2`.
 - **Risk:** Low. Well-maintained, used by the Charm team's own products.
 
 ---
@@ -389,15 +389,15 @@ func (m model) View() string {
 
 | Package | Import Path | Version | Date |
 |---------|------------|---------|------|
-| Lip Gloss | `github.com/charmbracelet/lipgloss/v2` | `v2.0.3` | 2026-04-13 |
-| Bubbles | `github.com/charmbracelet/bubbles/v2` | `v2.1.0` | 2026-03-26 |
+| Lip Gloss | `charm.land/lipgloss/v2` | `v2.0.3` | 2026-04-13 |
+| Bubbles | `charm.land/bubbles/v2` | `v2.1.0` | 2026-03-26 |
 
 ### go.mod directive
 
 ```
 require (
-    github.com/charmbracelet/lipgloss/v2 v2.0.3
-    github.com/charmbracelet/bubbles/v2 v2.1.0
+    charm.land/lipgloss/v2 v2.0.3
+    charm.land/bubbles/v2 v2.1.0
 )
 ```
 

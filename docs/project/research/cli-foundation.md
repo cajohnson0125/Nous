@@ -206,7 +206,7 @@ func main() {
 **License:** MIT
 **Stars:** 1.9k | **Importers:** 222
 
-> **Note:** Fang v2.0.1 requires import path `github.com/charmbracelet/fang/v2`. The pkg.go.dev page for `fang` (no version suffix) shows v1.0.0. Use the v2 module path.
+> **Note:** Fang v2.0.1 requires import path `charm.land/fang/v2`. The pkg.go.dev page for `fang` (no version suffix) shows v1.0.0. Use the v2 module path.
 
 ### 2.1 Role in Nous
 
@@ -324,7 +324,7 @@ import (
     "context"
     "os"
 
-    "github.com/charmbracelet/fang/v2"
+    "charm.land/fang/v2"
     "github.com/spf13/cobra"
 )
 
@@ -361,7 +361,7 @@ func main() {
 - **Stable v2 release.** v2.0.1 released March 2026.
 - **Experimental label** in README, but the API is clean and semver-stable at v2.
 - **Active development** by Charm team (aymanbagabas, meowgorithm).
-- **Import path changed** from v1 to v2: use `github.com/charmbracelet/fang/v2`.
+- **Import path changed** from v1 to v2: use `charm.land/fang/v2`.
 - **Dependencies:** Fang pulls in Lip Gloss, Bubbletea, and other Charm libraries. This aligns with Nous's stack.
 - **Risk:** Low. Even if Fang stops updating, it wraps Cobra in a thin layer that could be replaced with custom help templates.
 
@@ -405,7 +405,7 @@ import (
     "context"
     "os"
 
-    "github.com/charmbracelet/fang/v2"
+    "charm.land/fang/v2"
     "github.com/spf13/cobra"
 )
 
@@ -465,14 +465,14 @@ applyCmd.GroupID = "core"
 | Package | Import Path | Version | Date |
 |---------|------------|---------|------|
 | Cobra | `github.com/spf13/cobra` | `v1.10.2` | 2025-12-04 |
-| Fang | `github.com/charmbracelet/fang/v2` | `v2.0.1` | 2026-03-11 |
+| Fang | `charm.land/fang/v2` | `v2.0.1` | 2026-03-11 |
 
 ### go.mod directive
 
 ```
 require (
     github.com/spf13/cobra v1.10.2
-    github.com/charmbracelet/fang/v2 v2.0.1
+    charm.land/fang/v2 v2.0.1
 )
 ```
 
@@ -480,7 +480,7 @@ require (
 
 ## 5. Gaps & Considerations
 
-1. **Fang v2 module path** — Must use `/v2` suffix in import. The `pkg.go.dev/github.com/charmbracelet/fang` page shows v1.0.0; the v2 API is at `pkg.go.dev/github.com/charmbracelet/fang/v2`.
+1. **Fang v2 module path** — Must use `charm.land/fang/v2` import path. The `pkg.go.dev/github.com/charmbracelet/fang` page shows v1.0.0; the v2 API uses the `charm.land` vanity domain.
 2. **No Bubbletea integration** — Fang handles help/error rendering only. It does NOT launch a Bubbletea program. TUI interactions happen inside command `RunE` handlers.
 3. **Custom error handling** — For domain-specific errors (validation, state conflicts), Nous should define a custom `ErrorHandler` that formats errors with Fang styles but adds domain context.
 4. **Signal handling** — Fang's `WithNotifySignal()` handles OS signals. For Nous, pass `os.Interrupt, syscall.SIGTERM` for graceful shutdown of interactive TUI sessions.
@@ -495,5 +495,5 @@ require (
 - Cobra.dev documentation: https://cobra.dev
 - Fang GitHub: https://github.com/charmbracelet/fang
 - Fang GoDoc (v1): https://pkg.go.dev/github.com/charmbracelet/fang
-- Fang GoDoc (v2): https://pkg.go.dev/github.com/charmbracelet/fang/v2
+- Fang GoDoc (v2): https://pkg.go.dev/charm.land/fang/v2
 - pflag: https://pkg.go.dev/github.com/spf13/pflag

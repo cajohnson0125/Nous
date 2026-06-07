@@ -18,7 +18,7 @@ This document covers the three packages at the core of Nous's TUI layer: **Bubbl
 **License:** MIT
 **Stars:** 42.9k | **Forks:** 1.2k
 
-> **Note:** Bubbletea v2 uses import path `charm.land/bubbletea/v2` as shown in the official README tutorial. The GitHub-hosted pkg.go.dev path shows v1 API. Verify the exact go.mod module path before adding to Nous.
+> **Note:** Bubbletea v2 uses import path `charm.land/bubbletea/v2` as shown in the official README tutorial. The GitHub-hosted pkg.go.dev path shows v1 API. The v2 module path is `charm.land/bubbletea/v2`.
 
 ### 1.1 Role in Nous
 
@@ -32,13 +32,13 @@ Bubbletea programs are built around three core functions on a `Model`:
 type Model interface {
     Init() Cmd
     Update(Msg) (Model, Cmd)
-    View() string
+    View() View
 }
 ```
 
 - **Init()** -- Returns an initial command (or nil). Called once when the program starts.
 - **Update(Msg)** -- Receives messages (key presses, mouse events, timer ticks, custom messages) and returns an updated model plus an optional command.
-- **View()** -- Renders the current model state as a string. Called after every Update.
+- **View()** -- Renders the current model state as a `tea.View`. Called after every Update.
 
 **Data flow:**
 
@@ -56,7 +56,7 @@ Init() -> Cmd -> Msg -> Update() -> (Model, Cmd) -> View() -> render
 type Model interface {
     Init() Cmd
     Update(msg Msg) (Model, Cmd)
-    View() string
+    View() View
 }
 ```
 
@@ -97,30 +97,38 @@ Built-in commands:
 | `WindowSize() Cmd` | Query terminal size |
 | `Quit` | Quit the program (special sentinel) |
 
-#### Special Msg functions (returned from Update as commands)
+#### Commands → View Fields (v2 change)
+
+In v2, several v1 commands are now **declarative View fields** instead of commands:
+
+| v1 Command | v2 View Field |
+|------------|---------------|
+| `tea.EnterAltScreen` | `view.AltScreen = true` |
+| `tea.ExitAltScreen` | `view.AltScreen = false` |
+| `tea.EnableMouseCellMotion` | `view.MouseMode = tea.MouseModeCellMotion` |
+| `tea.EnableMouseAllMotion` | `view.MouseMode = tea.MouseModeAllMotion` |
+| `tea.HideCursor` | `view.Cursor = nil` |
+| `tea.ShowCursor` | `view.Cursor = &tea.Cursor{...}` or `tea.NewCursor(x, y)` |
+| `tea.SetWindowTitle("...")` | `view.WindowTitle = "..."` |
 
 ```go
-EnterAltScreen() Msg          // Switch to fullscreen
-ExitAltScreen() Msg           // Return to inline
-EnableMouseCellMotion() Msg   // Mouse click, release, wheel, drag
-EnableMouseAllMotion() Msg    // Mouse click, release, wheel, hover
-DisableMouse() Msg            // Disable mouse
-EnableBracketedPaste() Msg    // Enable paste handling
-HideCursor() Msg              // Hide cursor
-ShowCursor() Msg              // Show cursor
-ClearScreen() Msg             // Clear and move to top-left
-Quit() Msg                    // Quit the program
-Interrupt() Msg               // Send interrupt
-Suspend() Msg                 // Suspend the program
+// v2 example: set features declaratively in View()
+func (m model) View() tea.View {
+    v := tea.NewView("Hello, world!")
+    v.AltScreen = true
+    v.MouseMode = tea.MouseModeCellMotion
+    v.WindowTitle = "Nous"
+    return *v
+}
 ```
 
 #### `Key` and `KeyPressMsg`
 
 ```go
 type Key struct {
-    Type  KeyType    // KeyEnter, KeyRunes, KeyCtrlC, etc.
-    Runes []rune     // Rune content for KeyRunes
-    Alt   bool       // Alt modifier
+    Code  KeyCode    // KeyEnter, KeyRunes, KeyCtrlC, etc.
+    Text  string     // Text content for KeyRunes
+    Mod   Modifier   // Modifier keys (Alt, Shift, Ctrl, etc.)
 }
 
 type KeyPressMsg = Key  // v2 key message type
@@ -144,9 +152,6 @@ model, err := p.Run()
 
 | ProgramOption | Purpose |
 |---------------|---------|
-| `WithAltScreen()` | Start in fullscreen |
-| `WithMouseCellMotion()` | Enable mouse (click, drag, wheel) |
-| `WithMouseAllMotion()` | Enable mouse (click, hover, wheel) |
 | `WithContext(ctx)` | Context for cancellation |
 | `WithInput(r io.Reader)` | Custom input (default: stdin) |
 | `WithInputTTY()` | Open a new TTY for input |
@@ -154,12 +159,26 @@ model, err := p.Run()
 | `WithEnvironment(env)` | Environment variables |
 | `WithFPS(fps int)` | Custom max FPS (default 60, max 120) |
 | `WithFilter(fn)` | Intercept messages before Update |
-| `WithReportFocus()` | Enable focus/blur events |
-| `WithoutBracketedPaste()` | Disable paste handling |
 | `WithoutSignalHandler()` | Handle signals yourself |
 | `WithoutSignals()` | Ignore OS signals (testing) |
 | `WithoutRenderer()` | Non-TUI mode (no rendering) |
 | `WithoutCatchPanics()` | Disable panic recovery |
+
+> **v2 change:** Alt screen, mouse modes, focus reporting, bracketed paste, cursor, and window title are now **declarative View fields** set in `View()` rather than ProgramOptions or commands. See the View Fields table below.
+
+#### View Fields (declarative, v2)
+
+| Field | Type | What It Does |
+|-------|------|-------------|
+| `Content` | `string` | Set via `SetContent()` or `NewView()` |
+| `AltScreen` | `bool` | Enter/exit alt screen buffer |
+| `MouseMode` | `MouseMode` | None/CellMotion/AllMotion |
+| `ReportFocus` | `bool` | Focus/blur events |
+| `DisableBracketedPasteMode` | `bool` | Disable bracketed paste |
+| `WindowTitle` | `string` | Terminal window title |
+| `Cursor` | `*Cursor` | Position, shape, color, blink |
+| `ForegroundColor` | `Color` | Terminal foreground |
+| `BackgroundColor` | `Color` | Terminal background |
 
 #### Program Methods
 
@@ -184,7 +203,7 @@ import (
     "fmt"
     "os"
 
-    tea "github.com/charmbracelet/bubbletea/v2"
+    tea "charm.land/bubbletea/v2"
 )
 
 type model struct {
@@ -227,7 +246,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     return m, nil
 }
 
-func (m model) View() string {
+func (m model) View() tea.View {
     s := "What would you like to do?\n\n"
     for i, choice := range m.choices {
         cursor := " "
@@ -241,7 +260,7 @@ func (m model) View() string {
         s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
     }
     s += "\nPress q to quit.\n"
-    return s
+    return *tea.NewView(s)
 }
 
 func main() {
@@ -256,8 +275,12 @@ func main() {
 ### 1.6 Key Changes from v1 to v2
 
 - **KeyMsg renamed to KeyPressMsg** -- `KeyMsg` is still available as alias
-- **View returns `tea.View`** in the README tutorial (a new wrapper type), but pkg.go.dev shows `View() string`. Verify against actual v2 API.
-- **Import path** may be `charm.land/bubbletea/v2` per README tutorial
+- **View returns `tea.View`** -- a new wrapper type. Use `tea.NewView("content")` or `var v tea.View; v.SetContent("content")`.
+- **Import path** is `charm.land/bubbletea/v2`
+- **ProgramOptions → View fields** -- `WithAltScreen()`, `WithMouseCellMotion()`, `WithReportFocus()`, `WithoutBracketedPaste()` are now declarative View fields
+- **Commands → View fields** -- `EnterAltScreen`, `ExitAltScreen`, `EnableMouseCellMotion`, `HideCursor`, `ShowCursor`, `SetWindowTitle` are now declarative View fields
+- **Key fields changed** -- `msg.Type` → `msg.Code`, `msg.Runes` → `msg.Text` (string), `msg.Alt` → `msg.Mod.Contains(tea.ModAlt)`
+- **p.Start() / p.StartReturningModel()** → `p.Run()`
 - **Ultraviolet** replaces v1's internal terminal primitives
 - **Scrolling commands deprecated** -- `ScrollDown`, `ScrollUp`, `SyncScrollArea` are deprecated
 
@@ -473,7 +496,7 @@ Lip Gloss and Bubbletea use Colorprofile internally. Nous typically does NOT nee
 
 | Package | Import Path | Version | Date |
 |---------|------------|---------|------|
-| Bubbletea | `github.com/charmbracelet/bubbletea/v2` | `v2.0.7` | 2026-06-01 |
+| Bubbletea | `charm.land/bubbletea/v2` | `v2.0.7` | 2026-06-01 |
 | Ultraviolet | `github.com/charmbracelet/ultraviolet` | **No release** (commit hash) | N/A |
 | Colorprofile | `github.com/charmbracelet/colorprofile` | `v0.3.2` | 2025-08-13 |
 
@@ -481,7 +504,7 @@ Lip Gloss and Bubbletea use Colorprofile internally. Nous typically does NOT nee
 
 ```
 require (
-    github.com/charmbracelet/bubbletea/v2 v2.0.7
+    charm.land/bubbletea/v2 v2.0.7
     github.com/charmbracelet/colorprofile v0.3.2
     // Ultraviolet: transitive dependency via bubbletea/v2, do NOT pin directly
 )
@@ -515,8 +538,8 @@ Nous CLI (Cobra + Fang)
 
 1. **Bubbletea is launched from Cobra `RunE`** -- not from Fang. Fang handles help/errors. Interactive screens are separate Bubbletea programs.
 2. **One Bubbletea program per interactive command** -- each command with a TUI creates `tea.NewProgram(model).Run()`.
-3. **Alt screen for full-screen UIs** -- use `tea.WithAltScreen()` for dashboards, viewers. Inline mode for simple prompts.
-4. **Mouse support** -- enable `tea.WithMouseCellMotion()` for dashboards, `tea.WithMouseAllMotion()` for hover interactions.
+3. **Alt screen for full-screen UIs** -- set `view.AltScreen = true` in `View()` for dashboards, viewers. Inline mode for simple prompts.
+4. **Mouse support** -- set `view.MouseMode = tea.MouseModeCellMotion` in `View()` for dashboards, `tea.MouseModeAllMotion` for hover interactions.
 5. **Context cancellation** -- pass `tea.WithContext(ctx)` to tie Bubbletea lifetime to Cobra's context.
 6. **Ultraviolet is implicit** -- no direct import needed.
 
@@ -524,9 +547,9 @@ Nous CLI (Cobra + Fang)
 
 ## 6. Gaps & Considerations
 
-1. **Bubbletea v2 import path ambiguity** -- README shows `charm.land/bubbletea/v2` but pkg.go.dev shows `github.com/charmbracelet/bubbletea`. Verify the exact go.mod module path at implementation time. The v2 tag exists on GitHub.
+1. **Bubbletea v2 import path** -- Uses `charm.land/bubbletea/v2` vanity domain. Verify go.sum resolves correctly at implementation time.
 2. **Ultraviolet has no releases** -- cannot pin. Must rely on Bubbletea's go.sum to lock the transitive dependency. This is a risk if Ultraviolet introduces breaking changes between Bubbletea patch versions.
-3. **View() return type** -- README tutorial shows `tea.View` wrapper type, but pkg.go.dev shows `string`. This may be a v2 change not yet reflected in pkg.go.dev documentation.
+3. **View() returns tea.View** -- The v2 API uses `tea.View` (not `string`). Create with `tea.NewView("content")` or set content via `v.SetContent("content")`.
 4. **v1 to v2 migration** -- if any third-party Bubbles components still target v1, they will need updates. Verify Bubbles compatibility in Phase 3.
 5. **Performance** -- Ultraviolet's diffing renderer is optimized for SSH. This is critical for Nous's remote usage scenarios.
 6. **Testing Bubbletea** -- use `tea.NewProgram(model, tea.WithInput(strings.NewReader(...)), tea.WithOutput(io.Discard))` for unit testing without a real terminal.

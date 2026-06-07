@@ -18,7 +18,7 @@ This document covers **Huh** (charmbracelet/huh) for interactive forms and promp
 **License:** MIT
 **Stars:** 6.9k | **Forks:** 247
 
-> **Note:** Huh v2 uses import path `github.com/charmbracelet/huh/v2`.
+> **Note:** Huh v2 uses import path `charm.land/huh/v2`.
 
 ### 1.1 Role in Nous
 
@@ -136,7 +136,7 @@ import (
     "fmt"
     "log"
 
-    "github.com/charmbracelet/huh/v2"
+    "charm.land/huh/v2"
 )
 
 func main() {
@@ -348,14 +348,14 @@ All systems are **operational**.
 
 | Package | Import Path | Version | Date |
 |---------|------------|---------|------|
-| Huh | `github.com/charmbracelet/huh/v2` | `v2.0.3` | 2026-03-10 |
+| Huh | `charm.land/huh/v2` | `v2.0.3` | 2026-03-10 |
 | Glamour | `charm.land/glamour/v2` | `v2.0.0` | 2026 |
 
 ### go.mod directive
 
 ```
 require (
-    github.com/charmbracelet/huh/v2 v2.0.3
+    charm.land/huh/v2 v2.0.3
     charm.land/glamour/v2 v2.0.0
 )
 ```

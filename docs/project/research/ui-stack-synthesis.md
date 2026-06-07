@@ -17,11 +17,11 @@ Each package maps to a specific surface area in Nous:
 | Package | Version | Import Path | Surface Area |
 |---------|---------|------------|--------------|
 | Cobra | v1.10.2 | `github.com/spf13/cobra` | Command tree, flag parsing, subcommand routing, help generation |
-| Fang | v2.0.1 | `github.com/charmbracelet/fang/v2` | Styled help pages, styled errors, auto --version, manpages, completions |
-| Bubbletea | v2.0.7 | `github.com/charmbracelet/bubbletea/v2` | Interactive TUI programs (Elm Architecture: Model-Update-View) |
-| Lip Gloss | v2.0.3 | `github.com/charmbracelet/lipgloss/v2` | Declarative styling, layout, borders, colors, tables, lists, trees |
-| Bubbles | v2.1.0 | `github.com/charmbracelet/bubbles/v2` | Pre-built TUI components: table, viewport, list, spinner, input, progress |
-| Huh | v2.0.3 | `github.com/charmbracelet/huh/v2` | Interactive forms, prompts, approval gates, configuration wizards |
+| Fang | v2.0.1 | `charm.land/fang/v2` | Styled help pages, styled errors, auto --version, manpages, completions |
+| Bubbletea | v2.0.7 | `charm.land/bubbletea/v2` | Interactive TUI programs (Elm Architecture: Model-Update-View) |
+| Lip Gloss | v2.0.3 | `charm.land/lipgloss/v2` | Declarative styling, layout, borders, colors, tables, lists, trees |
+| Bubbles | v2.1.0 | `charm.land/bubbles/v2` | Pre-built TUI components: table, viewport, list, spinner, input, progress |
+| Huh | v2.0.3 | `charm.land/huh/v2` | Interactive forms, prompts, approval gates, configuration wizards |
 | Glamour | v2.0.0 | `charm.land/glamour/v2` | Markdown rendering with terminal styles, rich output display |
 | Colorprofile | v0.3.2 | `github.com/charmbracelet/colorprofile` | Color detection and downsampling (transitive via Lip Gloss) |
 | Ultraviolet | (no release) | `github.com/charmbracelet/ultraviolet` | Terminal primitives (transitive via Bubbletea, do NOT import directly) |
@@ -34,19 +34,19 @@ Each package maps to a specific surface area in Nous:
 require (
     // CLI Foundation
     github.com/spf13/cobra v1.10.2
-    github.com/charmbracelet/fang/v2 v2.0.1
+    charm.land/fang/v2 v2.0.1
 
     // TUI Framework
-    github.com/charmbracelet/bubbletea/v2 v2.0.7
+    charm.land/bubbletea/v2 v2.0.7
     github.com/charmbracelet/colorprofile v0.3.2
     // Ultraviolet: transitive via bubbletea/v2, do NOT pin directly
 
     // Styling & Layout
-    github.com/charmbracelet/lipgloss/v2 v2.0.3
-    github.com/charmbracelet/bubbles/v2 v2.1.0
+    charm.land/lipgloss/v2 v2.0.3
+    charm.land/bubbles/v2 v2.1.0
 
     // User Interaction
-    github.com/charmbracelet/huh/v2 v2.0.3
+    charm.land/huh/v2 v2.0.3
     charm.land/glamour/v2 v2.0.0
 )
 ```
@@ -152,7 +152,7 @@ Cobra RunE -> tea.NewProgram(dashModel).Run()
                      +----+----+
                           |
                           v
-                   View() returns string
+                   View() returns tea.View
                           |
                           v
                    Ultraviolet renderer
@@ -187,14 +187,14 @@ Several packages use different import paths between v1 and v2:
 
 | Package | v1 Import | v2 Import | Notes |
 |---------|-----------|-----------|-------|
-| Bubbletea | `github.com/charmbracelet/bubbletea` | `github.com/charmbracelet/bubbletea/v2` | Verify v2 tag resolves on pkg.go.dev |
-| Lip Gloss | `github.com/charmbracelet/lipgloss` | `github.com/charmbracelet/lipgloss/v2` | Standard /v2 suffix |
-| Bubbles | `github.com/charmbracelet/bubbles` | `github.com/charmbracelet/bubbles/v2` | Standard /v2 suffix |
-| Huh | `github.com/charmbracelet/huh` | `github.com/charmbracelet/huh/v2` | Standard /v2 suffix |
-| Fang | `github.com/charmbracelet/fang` | `github.com/charmbracelet/fang/v2` | Standard /v2 suffix |
-| Glamour | `github.com/charmbracelet/glamour` | `charm.land/glamour/v2` | VANITY DOMAIN -- verify go.sum |
+| Bubbletea | `github.com/charmbracelet/bubbletea` | `charm.land/bubbletea/v2` | VANITY DOMAIN |
+| Lip Gloss | `github.com/charmbracelet/lipgloss` | `charm.land/lipgloss/v2` | VANITY DOMAIN |
+| Bubbles | `github.com/charmbracelet/bubbles` | `charm.land/bubbles/v2` | VANITY DOMAIN |
+| Huh | `github.com/charmbracelet/huh` | `charm.land/huh/v2` | VANITY DOMAIN |
+| Fang | `github.com/charmbracelet/fang` | `charm.land/fang/v2` | VANITY DOMAIN |
+| Glamour | `github.com/charmbracelet/glamour` | `charm.land/glamour/v2` | VANITY DOMAIN |
 
-**Action required:** At implementation time, run `go get` for each package and verify the module path resolves correctly. Glamour's `charm.land` vanity domain must be verified in go.sum.
+**Action required:** At implementation time, run `go get` for each package and verify the `charm.land` vanity domains resolve correctly in go.sum.
 
 ### 6.2 Missing Features
 
