@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+var version = "dev"
+
 func main() {
-	fmt.Println("Nous v0.1.0")
+	fmt.Printf("Nous v%s\n", version)
 }
